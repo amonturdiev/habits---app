@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Habit Tracker</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --accent: #f59e0b;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        button.theme-toggle {
+            background: none;
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        /* Progress Bar Section */
+        .progress-section {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 25px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .progress-bar-container {
+            background: var(--border);
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: var(--success);
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Inputs and Lists */
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text-main);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        button.primary-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        button.primary-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .habit-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .habit-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            background: var(--card-bg);
+        }
+
+        .habit-item.completed {
+            border-color: var(--success);
+            opacity: 0.8;
+        }
+
+        .habit-info h3 {
+            margin: 0 0 4px 0;
+            font-size: 16px;
+        }
+
+        .habit-info p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .habit-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .streak-tag {
+            background: #fef3c7;
+            color: #d97706;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .check-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            background: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: transparent;
+            font-weight: bold;
+        }
+
+        .habit-item.completed .check-btn {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        /* Sidebar Elements */
+        .stats-panel, .badge-panel {
+            margin-bottom: 20px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .badge {
+            text-align: center;
+            padding: 10px 5px;
+            border-radius: 8px;
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            font-size: 11px;
+            opacity: 0.3;
+            filter: grayscale(100%);
+            transition: all 0.3s ease;
+        }
+
+        .badge.unlocked {
+            opacity: 1;
+            filter: grayscale(0%);
+            border-color: var(--accent);
+            background: #fffbeb;
+            color: #78350f;
+        }
+
+        .badge-icon {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        /* Notification Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>⚡ HabitForge</h1>
+            <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Mode</button>
+        </header>
+
+        <div class="progress-section">
+            <div class="progress-header">
+                <span>Today's Completion</span>
+                <span id="progressText">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div>
+                <div class="card">
+                    <h3>Create New Habit</h3>
+                    <div class="input-group">
+                        <input type="text" id="habitName" placeholder="Habit Name (e.g., Drink Water)">
+                        <input type="text" id="habitDesc" placeholder="Details (e.g., 3 liters)">
+                        <button class="primary-btn" onclick="addHabit()">Add Habit</button>
+                    </div>
+                </div>
+
+                <h2>Active Habits</h2>
+                <ul id="habitList" class="habit-list"></ul>
+            </div>
+
+            <div>
+                <div class="card stats-panel">
+                    <h3>Analytics</h3>
+                    <div class="stat-row">
+                        <span>Weekly Completion Rate:</span>
+                        <span id="weeklyStat">0%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Monthly Completion Rate:</span>
+                        <span id="monthlyStat">0%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Max Streak Reached:</span>
+                        <span id="maxStreak">0 days</span>
+                    </div>
+                </div>
+
+                <div class="card badge-panel">
+                    <h3>Achievements</h3>
+                    <div class="badge-grid">
+                        <div class="badge" id="badge-first">
+                            <span class="badge-icon">🎯</span>First Step
+                        </div>
+                        <div class="badge" id="badge-streak3">
+                            <span class="badge-icon">🔥</span>3 Day Streak
+                        </div>
+                        <div class="badge" id="badge-perfect">
+                            <span class="badge-icon">👑</span>Perfect Day
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="notificationToast">🔔 Friendly Reminder: Time to crush your goals today!</div>
+
+    <script>
+        // State management with LocalStorage
+        let habits = JSON.parse(localStorage.getItem('habits')) || [];
+        let stats = JSON.parse(localStorage.getItem('habitStats')) || { maxStreak: 0, history: {} };
+        
+        // Setup state and verify daily reset
+        function init() {
+            checkDailyReset();
+            render();
+            setupReminders();
+        }
+
+        // --- DAILY RESET LOGIC ---
+        function checkDailyReset() {
+            const todayStr = new Date().toDateString();
+            const lastOpenDate = localStorage.getItem('lastOpenDate');
+
+            if (lastOpenDate && lastOpenDate !== todayStr) {
+                // It's a new day! Calculate statistics before wiping current day checklist
+                recordDayHistory(lastOpenDate);
+
+                habits.forEach(habit => {
+                    if (habit.completedToday) {
+                        habit.streak += 1;
+                    } else {
+                        habit.streak = 0; // Streak broken if left incomplete
+                    }
+                    habit.completedToday = false; // Reset for the new day
+                });
+                
+                showToast("🌅 Good morning! System reset. Let's conquer today's habits!");
+                saveData();
+            }
+            localStorage.setItem('lastOpenDate', todayStr);
+        }
+
+        function recordDayHistory(dateStr) {
+            if (habits.length === 0) return;
+            const completedCount = habits.filter(h => h.completedToday).length;
+            const percentage = (completedCount / habits.length) * 100;
+            stats.history[dateStr] = percentage;
+            saveData();
+        }
+
+        // --- CRUD ACTIONS ---
+        function addHabit() {
+            const name = document.getElementById('habitName').value.trim();
+            const desc = document.getElementById('habitDesc').value.trim();
+
+            if (!name) return alert("Please type a habit!");
+
+            habits.push({
+                id: Date.now(),
+                name: name,
+                desc: desc || 'No description',
+                completedToday: false,
+                streak: 0
+            });
+
+            document.getElementById('habitName').value = '';
+            document.getElementById('habitDesc').value = '';
+            
+            saveData();
+            render();
+        }
+
+        function toggleComplete(id) {
+            habits = habits.map(habit => {
+                if (habit.id === id) {
+                    habit.completedToday = !habit.completedToday;
+                }
+                return habit;
+            });
+            saveData();
+            render();
+        }
+
+        // --- RENDER & CALCULATIONS ---
+        function render() {
+            const list = document.getElementById('habitList');
+            list.innerHTML = '';
+
+            if(habits.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-muted)">No habits added yet.</p>';
+            }
+
+            let completedTodayCount = 0;
+
+            habits.forEach(habit => {
+                if (habit.completedToday) completedTodayCount++;
+                
+                // Track highest historic streak
+                if (habit.streak > stats.maxStreak) stats.maxStreak = habit.streak;
+
+                const li = document.createElement('li');
+                li.className = `habit-item ${habit.completedToday ? 'completed' : ''}`;
+                li.innerHTML = `
+                    <div class="habit-info">
+                        <h3>${habit.name}</h3>
+                        <p>${habit.desc}</p>
+                    </div>
+                    <div class="habit-meta">
+                        <span class="streak-tag">🔥 ${habit.completedToday ? habit.streak + 1 : habit.streak} days</span>
+                        <button class="check-btn" onclick="toggleComplete(${habit.id})">✓</button>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+
+            // Update Progress Bar
+            const progressPercent = habits.length ? Math.round((completedTodayCount / habits.length) * 100) : 0;
+            document.getElementById('progressBar').style.width = `${progressPercent}%`;
+            document.getElementById('progressText').textContent = `${progressPercent}%`;
+
+            calculateStats();
+            checkBadges(completedTodayCount, progressPercent);
+        }
+
+        function calculateStats() {
+            document.getElementById('maxStreak').textContent = `${stats.maxStreak} days`;
+            
+            const historyValues = Object.values(stats.history);
+            if(historyValues.length === 0) return;
+
+            // Approximate weekly/monthly performance thresholds based on history logs
+            const weeklySum = historyValues.slice(-7).reduce((a,b) => a+b, 0);
+            const weeklyAvg = Math.round(weeklySum / Math.min(historyValues.length, 7));
+            document.getElementById('weeklyStat').textContent = `${weeklyAvg || 0}%`;
+
+            const monthlySum = historyValues.slice(-30).reduce((a,b) => a+b, 0);
+            const monthlyAvg = Math.round(monthlySum / Math.min(historyValues.length, 30));
+            document.getElementById('monthlyStat').textContent = `${monthlyAvg || 0}%`;
+        }
+
+        function checkBadges(completedTodayCount, progressPercent) {
+            // Badge 1: First Step
+            if (completedTodayCount > 0) document.getElementById('badge-first').classList.add('unlocked');
+            
+            // Badge 2: Perfect Day
+            if (progressPercent === 100 && habits.length > 0) document.getElementById('badge-perfect').classList.add('unlocked');
+            
+            // Badge 3: 3-Day Streak Tracker
+            const structuralStreak = habits.some(h => h.streak >= 3);
+            if (structuralStreak) document.getElementById('badge-streak3').classList.add('unlocked');
+        }
+
+        function saveData() {
+            localStorage.setItem('habits', JSON.stringify(habits));
+            localStorage.setItem('habitStats', JSON.stringify(stats));
+        }
+
+        // --- UX / EXTRA UTILITIES ---
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const targetTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', targetTheme);
+        }
+
+        function setupReminders() {
+            // Simulates a friendly recurring app notification layout every 30 seconds
+            setInterval(() => {
+                const uncompleted = habits.filter(h => !h.completedToday).length;
+                if(uncompleted > 0) {
+                    showToast(`🔔 Don't lose your streak! You have ${uncompleted} remaining habits to complete today.`);
+                }
+            }, 30000);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('notificationToast');
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 4000);
+        }
+
+        // Run application on load
+        init();
+    </script>
+</body>
+</html>
